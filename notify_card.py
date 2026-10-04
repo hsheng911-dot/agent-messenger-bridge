@@ -45,6 +45,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from datetime import datetime
 from pathlib import Path
 
 STATE_DIR = Path(os.path.expanduser("~/.claude/feishu-bridge"))
@@ -109,53 +110,6 @@ def fmt_duration(sec: float) -> str:
     return f"{sec // 3600}小时{sec % 3600 // 60}分"
 
 
-def session_stats(path: str | None) -> dict:
-    """
-    从 transcript 统计整个会话的耗时与 token 消耗。
-
-    耗时 = 首条记录到最后一条记录的时间差（含空闲，是墙钟时间）。
-    token 按 assistant 消息的 usage 累加，按 message.id 去重；
-    输入含缓存写入/读取（缓存读取占大头，是正常现象）。
-    """
-    stats = {"duration_sec": 0, "input": 0, "output": 0, "cache_creation": 0, "cache_read": 0}
-    if not path or not os.path.exists(path):
-        return stats
-
-    from datetime import datetime
-
-    objs = _load_transcript(path)
-    first_ts = last_ts = None
-    seen_ids: set[str] = set()
-    for obj in objs:
-        ts = obj.get("timestamp")
-        if isinstance(ts, str) and ts:
-            try:
-                t = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-                if first_ts is None:
-                    first_ts = t
-                last_ts = t
-            except Exception:
-                pass
-
-        if obj.get("type") != "assistant":
-            continue
-        msg = obj.get("message") or {}
-        mid = msg.get("id")
-        if mid:
-            if mid in seen_ids:
-                continue
-            seen_ids.add(mid)
-        usage = msg.get("usage") or {}
-        stats["input"] += usage.get("input_tokens") or 0
-        stats["output"] += usage.get("output_tokens") or 0
-        stats["cache_creation"] += usage.get("cache_creation_input_tokens") or 0
-        stats["cache_read"] += usage.get("cache_read_input_tokens") or 0
-
-    if first_ts and last_ts:
-        stats["duration_sec"] = max(0, int((last_ts - first_ts).total_seconds()))
-    return stats
-
-
 def _load_transcript(path: str | None) -> list[dict]:
     """读取 Claude Code 的 transcript JSONL，返回解析成功的记录列表。"""
     if not path or not os.path.exists(path):
@@ -214,44 +168,101 @@ def _clean_user_text(text: str) -> str:
     return text.strip()
 
 
-def recent_turns(path: str | None, max_turns: int = 1):
+def parse_turns(path: str | None) -> list[dict]:
     """
-    从 transcript 末尾回溯，提取最近 N 轮完整对话。
+    把 transcript 按原始顺序切成「轮次」。
 
-    返回 [(用户提问, AI输出), ...]，时间顺序为「由旧到新」。
     一轮 = 一条 user 消息 + 紧随其后（直到下一条 user 之前）的 assistant 输出。
+    每轮附带起止时间与 token 消耗（assistant 消息按 message.id 去重后累加 usage），
+    这样耗时/Token 就能对应到卡片实际展示的那几轮提问。
     """
     objs = _load_transcript(path)
     if not objs:
         return []
 
-    # 先按原始顺序切成「轮次」：遇到 user 就开新一轮
-    turns: list[list[str, str]] = []
+    def _ts(obj: dict):
+        ts = obj.get("timestamp")
+        if isinstance(ts, str) and ts:
+            try:
+                return datetime.fromisoformat(ts.replace("Z", "+00:00"))
+            except Exception:
+                pass
+        return None
+
+    turns: list[dict] = []
+    seen_ids: set[str] = set()
     for obj in objs:
         role = obj.get("type")
         if role not in ("user", "assistant"):
             continue
         msg = obj.get("message", {}) if isinstance(obj.get("message"), dict) else {}
-        text = _extract_text(msg, role)
+        ts = _ts(obj)
+
         if role == "user":
-            text = _clean_user_text(text)
+            text = _clean_user_text(_extract_text(msg, role))
             if not text:
                 continue  # 纯工具结果，不是真正的提问
-            turns.append([text, ""])
-        else:
-            if not text:
+            turns.append({"question": text, "answer": "", "start": ts, "end": ts,
+                          "input": 0, "output": 0, "cache_creation": 0, "cache_read": 0})
+            continue
+
+        # assistant：先按 message.id 去重累加 token，再拼接文本
+        mid = msg.get("id")
+        if mid:
+            if mid in seen_ids:
                 continue
-            if turns:
-                # 同一轮内多段 assistant 输出拼接（中间可能夹了工具调用）
-                turns[-1][1] = (turns[-1][1] + "\n" + text).strip() if turns[-1][1] else text
-            else:
-                turns.append(["（会话开头的输出）", text])
+            seen_ids.add(mid)
+        usage = msg.get("usage") or {}
+        if not turns:
+            # 会话开头没有提问，先有输出
+            turns.append({"question": "（会话开头的输出）", "answer": "", "start": ts, "end": ts,
+                          "input": 0, "output": 0, "cache_creation": 0, "cache_read": 0})
+        cur = turns[-1]
+        cur["input"] += usage.get("input_tokens") or 0
+        cur["output"] += usage.get("output_tokens") or 0
+        cur["cache_creation"] += usage.get("cache_creation_input_tokens") or 0
+        cur["cache_read"] += usage.get("cache_read_input_tokens") or 0
+
+        text = _extract_text(msg, role)
+        if text:
+            # 同一轮内多段 assistant 输出拼接（中间可能夹了工具调用）
+            cur["answer"] = (cur["answer"] + "\n" + text).strip() if cur["answer"] else text
+        if ts:
+            cur["end"] = ts
 
     # 丢掉最后没有 AI 输出的半轮（用户刚提问还没回答就被打断的情况）
-    if turns and not turns[-1][1]:
+    if turns and not turns[-1]["answer"]:
         turns.pop()
 
-    return [(q, a) for q, a in turns][-max_turns:] if max_turns > 0 else turns
+    return turns
+
+
+def recent_turns(path: str | None, max_turns: int = 1):
+    """从 transcript 末尾取最近 N 轮，返回 [(用户提问, AI输出), ...]（由旧到新）。"""
+    pairs = [(t["question"], t["answer"]) for t in parse_turns(path)]
+    return pairs[-max_turns:] if max_turns > 0 else pairs
+
+
+def turns_stats(turns: list[dict], whole_session: bool = False) -> dict:
+    """统计展示轮次的耗时与 token 消耗。
+
+    耗时 = 各轮处理时间之和（提问到该轮最后一条输出，不含轮与轮之间的空闲）。
+    输入含缓存写入/读取（缓存读取占大头，是正常现象）。
+    """
+    st = {"duration_sec": 0, "input": 0, "output": 0,
+          "cache_creation": 0, "cache_read": 0, "label": ""}
+    for t in turns:
+        if t.get("start") and t.get("end"):
+            st["duration_sec"] += max(0, int((t["end"] - t["start"]).total_seconds()))
+        st["input"] += t.get("input", 0)
+        st["output"] += t.get("output", 0)
+        st["cache_creation"] += t.get("cache_creation", 0)
+        st["cache_read"] += t.get("cache_read", 0)
+    if whole_session:
+        st["label"] = "整个会话"
+    else:
+        st["label"] = "本轮" if len(turns) <= 1 else f"最近{len(turns)}轮合计"
+    return st
 
 
 def last_assistant_message(hook: dict) -> str:
@@ -325,14 +336,15 @@ def build_card(ctx: dict, mode: str) -> dict:
         {"tag": "hr"},
     ]
 
-    # 会话耗时 + token 消耗（整个会话累计，不是单轮）
+    # 耗时 + token 消耗（对应卡片展示的轮次，默认最近 1 轮）
     st = ctx.get("stats") or {}
     if st.get("output") or st.get("input"):
         total_in = st.get("input", 0) + st.get("cache_creation", 0) + st.get("cache_read", 0)
+        label = st.get("label") or "本轮"
         elements.insert(1, {
             "tag": "markdown",
             "content": (
-                f"**⏱ 会话耗时** {fmt_duration(st.get('duration_sec', 0))} · "
+                f"**⏱ {label}耗时** {fmt_duration(st.get('duration_sec', 0))} · "
                 f"**🔢 Token** 输入(含缓存) {fmt_tokens(total_in)} · "
                 f"输出 {fmt_tokens(st.get('output', 0))}"
             ),
@@ -542,12 +554,14 @@ def main() -> int:
     cwd = os.environ.get("CLAUDE_PROJECT_DIR") or hook.get("cwd") or os.getcwd()
     branch, git_status = git_info(cwd)
 
-    # 提取最近 N 轮完整问答（0 = 整个会话全部轮次）
+    # 提取最近 N 轮完整问答（0 = 整个会话全部轮次）；耗时/Token 统计对应展示的轮次
     try:
         max_turns = int(os.environ.get("FEISHU_TURNS", "1"))
     except ValueError:
         max_turns = 1
-    turns = recent_turns(hook.get("transcript_path"), max_turns=max_turns)
+    shown = parse_turns(hook.get("transcript_path"))
+    shown = shown[-max_turns:] if max_turns > 0 else shown
+    turns = [(t["question"], t["answer"]) for t in shown]
 
     ctx = {
         "session_id": session_id,
@@ -557,7 +571,7 @@ def main() -> int:
         "time": time.strftime("%Y-%m-%d %H:%M:%S"),
         "summary": last_assistant_message(hook),
         "turns": turns,
-        "stats": session_stats(hook.get("transcript_path")),
+        "stats": turns_stats(shown, whole_session=(max_turns == 0)),
     }
     log(f"解析到 {len(turns)} 轮对话 (FEISHU_TURNS={max_turns})")
 
