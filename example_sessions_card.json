@@ -1,0 +1,160 @@
+{
+  "schema": "2.0",
+  "config": {
+    "update_multi": true,
+    "width_mode": "fill"
+  },
+  "header": {
+    "template": "blue",
+    "title": {
+      "tag": "plain_text",
+      "content": "🧭 Claude Code 会话列表"
+    },
+    "subtitle": {
+      "tag": "plain_text",
+      "content": "执行中 0 · 共 3"
+    }
+  },
+  "body": {
+    "direction": "vertical",
+    "padding": "12px",
+    "elements": [
+      {
+        "tag": "markdown",
+        "content": "**执行中 0** · 等待输入 1 · 共 3\n\n<font color='grey'>扫描于 2026-10-04 09:25:06</font>"
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "markdown",
+        "content": "**1. ⏸ 等待输入 `my-app`**\n\n`/data/workspace/my-app`\n\npid `1744` · cpu 0.0% · 更新于 3 分钟前 · 会话 `aaa111bb`\n\n💬 帮我重构登录模块"
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "markdown",
+        "content": "**2. ✅ 已结束 `other-proj`**\n\n`/Users/me/other-proj`\n\n更新于 13 分钟前 · 会话 `ccc333dd`\n\n💬 跑一下测试"
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "markdown",
+        "content": "**3. ✅ 已结束 `my-app`**\n\n`/data/workspace/my-app`\n\n更新于 2 天前 · 会话 `eee555ff`\n\n💬 修个 typo"
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "column_set",
+        "flex_mode": "bisect",
+        "horizontal_spacing": "8px",
+        "columns": [
+          {
+            "tag": "column",
+            "width": "weighted",
+            "weight": 1,
+            "elements": [
+              {
+                "tag": "button",
+                "text": {
+                  "tag": "plain_text",
+                  "content": "选中 #1"
+                },
+                "type": "default",
+                "size": "small",
+                "width": "fill",
+                "behaviors": [
+                  {
+                    "type": "callback",
+                    "value": {
+                      "action": "select",
+                      "index": 1,
+                      "session_id": "aaa111bbb222",
+                      "cwd": "/data/workspace/my-app"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "column",
+            "width": "weighted",
+            "weight": 1,
+            "elements": [
+              {
+                "tag": "button",
+                "text": {
+                  "tag": "plain_text",
+                  "content": "选中 #2"
+                },
+                "type": "default",
+                "size": "small",
+                "width": "fill",
+                "behaviors": [
+                  {
+                    "type": "callback",
+                    "value": {
+                      "action": "select",
+                      "index": 2,
+                      "session_id": "ccc333ddd444",
+                      "cwd": "/Users/me/other-proj"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "column_set",
+        "flex_mode": "bisect",
+        "horizontal_spacing": "8px",
+        "columns": [
+          {
+            "tag": "column",
+            "width": "weighted",
+            "weight": 1,
+            "elements": [
+              {
+                "tag": "button",
+                "text": {
+                  "tag": "plain_text",
+                  "content": "选中 #3"
+                },
+                "type": "default",
+                "size": "small",
+                "width": "fill",
+                "behaviors": [
+                  {
+                    "type": "callback",
+                    "value": {
+                      "action": "select",
+                      "index": 3,
+                      "session_id": "eee555fff666",
+                      "cwd": "/data/workspace/my-app"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "column",
+            "width": "weighted",
+            "weight": 1,
+            "elements": []
+          }
+        ]
+      },
+      {
+        "tag": "markdown",
+        "content": "<font color='grey'>选中后，完成卡片上的「继续/自查/提交/结束」会作用于该会话；也可直接发送 <font color='blue'>/focus 2</font></font>"
+      }
+    ]
+  }
+}
