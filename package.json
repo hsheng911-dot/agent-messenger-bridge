@@ -10,7 +10,8 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "bridge": "node lib/bridge.js"
   },
   "dependencies": {
     "@larksuiteoapi/node-sdk": "^1.74.0"

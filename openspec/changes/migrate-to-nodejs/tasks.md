@@ -41,5 +41,5 @@
 ## 8. 收尾:下线 Python 版与文档(依赖 7 验收通过)
 
 - [ ] 8.1 双模式真机验收(webhook + app 各一台,含 Windows):从 `node bin/setup.js` 开始到飞书按钮闭环全流程通过;验证:README 的验证步骤逐步执行通过
-- [ ] 8.2 删除 `notify_card.py`/`session_scanner.py`/`bridge_server.py`/`install.sh`,更新 README(安装手册、配置说明、常见问题)与 REQUIREMENTS 中的技术栈描述;验证:仓库中无 .py 残留,README 所有命令可照抄执行
-- [ ] 8.3 `openspec validate` 通过并核对四个 spec 的 scenario 均有对应实现与测试;验证:validate 输出无 error
+- [x] 8.2 删除 `notify_card.py`/`session_scanner.py`/`bridge_server.py`/`install.sh`,更新 README(安装手册、配置说明、常见问题)与 REQUIREMENTS 中的技术栈描述;验证:仓库中无 .py 残留,README 所有命令可照抄执行
+- [x] 8.3 `openspec validate` 通过并核对四个 spec 的 scenario 均有对应实现与测试;验证:validate 输出无 error
