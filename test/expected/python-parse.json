@@ -1,0 +1,252 @@
+{
+  "interrupted-half-turn.jsonl": {
+    "turns": [
+      {
+        "question": "第一轮:把README改一下",
+        "answer": "README 已更新。",
+        "start": "2026-10-04T10:00:00+00:00",
+        "end": "2026-10-04T10:00:30+00:00",
+        "input": 100,
+        "output": 20,
+        "cache_creation": 0,
+        "cache_read": 0
+      }
+    ],
+    "stats_turn1": {
+      "duration_sec": 30,
+      "input": 100,
+      "output": 20,
+      "cache_creation": 0,
+      "cache_read": 0,
+      "label": "本轮"
+    },
+    "stats_whole": {
+      "duration_sec": 30,
+      "input": 100,
+      "output": 20,
+      "cache_creation": 0,
+      "cache_read": 0,
+      "label": "整个会话"
+    }
+  },
+  "multi-turn.jsonl": {
+    "turns": [
+      {
+        "question": "第一问:这个项目是做什么的?",
+        "answer": "是一个演示项目。",
+        "start": "2026-10-04T10:00:00+00:00",
+        "end": "2026-10-04T10:00:30+00:00",
+        "input": 100,
+        "output": 20,
+        "cache_creation": 0,
+        "cache_read": 0
+      },
+      {
+        "question": "第二问:帮我跑一下测试",
+        "answer": "🔧 调用 `Bash` npm test\n测试全部通过。",
+        "start": "2026-10-04T10:01:00+00:00",
+        "end": "2026-10-04T10:01:40+00:00",
+        "input": 270,
+        "output": 55,
+        "cache_creation": 0,
+        "cache_read": 0
+      },
+      {
+        "question": "最后的提问:把结果发到飞书",
+        "answer": "已发送。",
+        "start": "2026-10-04T10:02:00+00:00",
+        "end": "2026-10-04T10:02:20+00:00",
+        "input": 180,
+        "output": 15,
+        "cache_creation": 0,
+        "cache_read": 0
+      }
+    ],
+    "stats_turn1": {
+      "duration_sec": 20,
+      "input": 180,
+      "output": 15,
+      "cache_creation": 0,
+      "cache_read": 0,
+      "label": "本轮"
+    },
+    "stats_whole": {
+      "duration_sec": 90,
+      "input": 550,
+      "output": 90,
+      "cache_creation": 0,
+      "cache_read": 0,
+      "label": "整个会话"
+    }
+  },
+  "no-initial-question.jsonl": {
+    "turns": [
+      {
+        "question": "（会话开头的输出）",
+        "answer": "会话开头没有提问,先有输出。",
+        "start": "2026-10-04T10:00:05+00:00",
+        "end": "2026-10-04T10:00:05+00:00",
+        "input": 90,
+        "output": 15,
+        "cache_creation": 0,
+        "cache_read": 0
+      },
+      {
+        "question": "好,那么继续第二件事",
+        "answer": "第二件事已完成。",
+        "start": "2026-10-04T10:01:00+00:00",
+        "end": "2026-10-04T10:01:45+00:00",
+        "input": 110,
+        "output": 35,
+        "cache_creation": 0,
+        "cache_read": 0
+      }
+    ],
+    "stats_turn1": {
+      "duration_sec": 45,
+      "input": 110,
+      "output": 35,
+      "cache_creation": 0,
+      "cache_read": 0,
+      "label": "本轮"
+    },
+    "stats_whole": {
+      "duration_sec": 45,
+      "input": 200,
+      "output": 50,
+      "cache_creation": 0,
+      "cache_read": 0,
+      "label": "整个会话"
+    }
+  },
+  "only-tool-result.jsonl": {
+    "turns": [
+      {
+        "question": "（会话开头的输出）",
+        "answer": "开头先出现的是工具结果,我直接继续上一轮的分析。",
+        "start": "2026-10-04T10:00:20+00:00",
+        "end": "2026-10-04T10:00:20+00:00",
+        "input": 100,
+        "output": 30,
+        "cache_creation": 0,
+        "cache_read": 0
+      },
+      {
+        "question": "真正的问题:接下来做什么?",
+        "answer": "下一步:跑完整回归。",
+        "start": "2026-10-04T10:01:00+00:00",
+        "end": "2026-10-04T10:01:30+00:00",
+        "input": 120,
+        "output": 25,
+        "cache_creation": 0,
+        "cache_read": 0
+      }
+    ],
+    "stats_turn1": {
+      "duration_sec": 30,
+      "input": 120,
+      "output": 25,
+      "cache_creation": 0,
+      "cache_read": 0,
+      "label": "本轮"
+    },
+    "stats_whole": {
+      "duration_sec": 30,
+      "input": 220,
+      "output": 55,
+      "cache_creation": 0,
+      "cache_read": 0,
+      "label": "整个会话"
+    }
+  },
+  "streaming-dup.jsonl": {
+    "turns": [
+      {
+        "question": "跑一下测试并汇报",
+        "answer": "🔧 调用 `Bash` npm test",
+        "start": "2026-10-04T10:00:00+00:00",
+        "end": "2026-10-04T10:00:10+00:00",
+        "input": 100,
+        "output": 50,
+        "cache_creation": 10,
+        "cache_read": 200
+      }
+    ],
+    "stats_turn1": {
+      "duration_sec": 10,
+      "input": 100,
+      "output": 50,
+      "cache_creation": 10,
+      "cache_read": 200,
+      "label": "本轮"
+    },
+    "stats_whole": {
+      "duration_sec": 10,
+      "input": 100,
+      "output": 50,
+      "cache_creation": 10,
+      "cache_read": 200,
+      "label": "整个会话"
+    }
+  },
+  "system-reminder.jsonl": {
+    "turns": [
+      {
+        "question": "用户真正输入的问题:这个模块怎么用?",
+        "answer": "这个模块这样用……",
+        "start": "2026-10-04T10:00:00+00:00",
+        "end": "2026-10-04T10:00:40+00:00",
+        "input": 100,
+        "output": 40,
+        "cache_creation": 0,
+        "cache_read": 0
+      }
+    ],
+    "stats_turn1": {
+      "duration_sec": 40,
+      "input": 100,
+      "output": 40,
+      "cache_creation": 0,
+      "cache_read": 0,
+      "label": "本轮"
+    },
+    "stats_whole": {
+      "duration_sec": 40,
+      "input": 100,
+      "output": 40,
+      "cache_creation": 0,
+      "cache_read": 0,
+      "label": "整个会话"
+    }
+  },
+  "with-tools.jsonl": {
+    "turns": [
+      {
+        "question": "帮我看下测试为什么挂了",
+        "answer": "我先看一下测试输出。\n🔧 调用 `Bash` npm test\n原因找到了:断言里少了一个边界判断,已修复并复跑通过。",
+        "start": "2026-10-04T10:00:00+00:00",
+        "end": "2026-10-04T10:01:00+00:00",
+        "input": 250,
+        "output": 130,
+        "cache_creation": 15,
+        "cache_read": 500
+      }
+    ],
+    "stats_turn1": {
+      "duration_sec": 60,
+      "input": 250,
+      "output": 130,
+      "cache_creation": 15,
+      "cache_read": 500,
+      "label": "本轮"
+    },
+    "stats_whole": {
+      "duration_sec": 60,
+      "input": 250,
+      "output": 130,
+      "cache_creation": 15,
+      "cache_read": 500,
+      "label": "整个会话"
+    }
+  }
+}
